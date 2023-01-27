@@ -1,0 +1,9 @@
+::1 - - [27/Jan/2023:17:48:31 +0000] "GET /movies/Scream HTTP/1.1" 200 808
+::1 - - [27/Jan/2023:17:48:59 +0000] "DELETE /users/Tommy%20Brown/movies/63d3ba7ad8b776d6fcda1797 HTTP/1.1" 200 4
+::1 - - [27/Jan/2023:17:49:14 +0000] "POST /users HTTP/1.1" 201 187
+::1 - - [27/Jan/2023:17:49:18 +0000] "GET /users/testuser1083 HTTP/1.1" 200 187
+::1 - - [27/Jan/2023:17:49:22 +0000] "GET /movies/directors/Steven%20Spielberg HTTP/1.1" 200 512
+::1 - - [27/Jan/2023:17:49:25 +0000] "GET /movies/genre/Horror HTTP/1.1" 404 158
+::1 - - [27/Jan/2023:17:51:28 +0000] "GET /movies/Genre/Horror HTTP/1.1" 404 158
+::1 - - [27/Jan/2023:17:51:35 +0000] "GET /movies/genre/Horror HTTP/1.1" 404 158
+::1 - - [27/Jan/2023:17:51:44 +0000] "GET /movies/Scream HTTP/1.1" 200 808
