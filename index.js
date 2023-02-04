@@ -8,6 +8,7 @@ path = require('path');
 const app = express();
 const mongoose = require('mongoose');
 const Models = require('./models.js');
+const { check, validationResult } = require('express-validator');
 
 const Movies = Models.Movie;
 const Users = Models.User;
@@ -18,6 +19,21 @@ const Directors = Models.Director;
 mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const cors = require('cors');
+let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){ // If a specific origin isn’t found on the list of allowed origins
+      let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
+      return callback(new Error(message ), false);
+    }
+    return callback(null, true);
+  }
+}));
+
 let auth = require('./auth')(app);
 
 const passport = require('passport');
@@ -117,7 +133,23 @@ app.get('/users/:Username', passport.authenticate('jwt', { session: false }), (r
 })
 
 // Allow new users register (create)
-app.post('/users', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.post('/users', 
+[ 
+  // minimum value of 5 characters
+  check ('Username', 'Username is required').isLength({min: 5}),
+  check ('Username', 'Username contains non alphanumeric character - not allowed.').isAlphanumeric(),
+  // is not empty
+  check('Password', 'Password is required').not().isEmpty(),
+  check ('Email', 'Email does not appear to be valid').isEmail()
+], (req, res) => {
+    // check the validation object for errors
+  let errors = validationResult(req);
+
+  if(!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array()});
+  } 
+
+  let hashedPassword = Users.hashedPassword(req.body.Password); // this hash the password before storing it in the mongoDB database
   Users.findOne({ Username: req.body.Username })
   .then((user) => {
     if (user) {
@@ -126,7 +158,7 @@ app.post('/users', passport.authenticate('jwt', { session: false }), (req, res) 
       Users
       .create({
         Username: req.body.Username,
-        Password: req.body.Password,
+        Password: hashedPassword,
         Email: req.body.Email,
         Birthday: req.body.Birthday
       })
@@ -144,12 +176,18 @@ app.post('/users', passport.authenticate('jwt', { session: false }), (req, res) 
 });
 
 // Allow users update their user info (Update)
-app.put('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
+[ 
+  check ('Username', 'Username is required').isLength({min: 5}),
+  check ('Username', 'Username contains non alphanumeric character - not allowed.').isAlphanumeric(),
+  check('Password', 'Password is required').not().isEmpty(),
+  check ('Email', 'Email does not appear to be valid').isEmail()
+], (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username},
     { $set:
       {
         Username: req.body.Username,
-        Passworf: req.body.Password,
+        Password: req.body.Password,
         Email: req.body.Email,
         Birthday: req.body.Birthday
       }
@@ -223,6 +261,7 @@ app.put('/users/:Username', passport.authenticate('jwt', { session: false }), (r
     res.status(500).send('Something broke!')
   });
 
-  app.listen(8080, () => {
-    console.log('Your app is listening on port 8080');
-  });
+  const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0',() => {
+ console.log('Listening on Port ' + port);
+});
