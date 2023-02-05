@@ -16,7 +16,10 @@ const Genres = Models.Genre;
 const Directors = Models.Director;
 
 // This allows mongoose connect to the database so it can perform CRUD operations . the 'test' is the name of the database created
-mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
+//Local
+//mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
+//Online
+mongoose.connect('mongodb+srv://flixy:flix123@myflixdb.nwuy0i6.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -265,3 +268,4 @@ app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
 app.listen(port, '0.0.0.0',() => {
  console.log('Listening on Port ' + port);
 });
+
