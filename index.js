@@ -19,7 +19,9 @@ const Directors = Models.Director;
 //Local
 //mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
 //Online
-mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb+srv://flixy:flix123@myflixdb.nwuy0i6.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true});
+//Secure version but doesn't seem to work?
+//mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
