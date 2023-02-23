@@ -63,8 +63,10 @@ app.get('/', (req, res) => {
   res.send('Welcome to MyFlix!');
 });
 
+// Temporarily adjusted version
+
 // get all movies and return json object
-app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/movies', (req, res) => {
   Movies.find()
   .then((movies) => {
     res.status(200).json(movies);
@@ -74,6 +76,20 @@ app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) 
     res.status(500).send('Error: ' + err);
   });
 });
+
+// Commented out version for later
+
+// get all movies and return json object
+//app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+//  Movies.find()
+//  .then((movies) => {
+//    res.status(200).json(movies);
+//  })
+//  .catch((err) => {
+//    console.error(err);
+//    res.status(500).send('Error: ' + err);
+//  });
+//});
 
 // get movies by title
 app.get('/movies/:title', passport.authenticate('jwt', { session: false }), (req, res) => {
