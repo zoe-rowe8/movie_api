@@ -17,7 +17,10 @@ const Genres = Models.Genre;
 const Directors = Models.Director;
 
 // This allows mongoose connect to the database so it can perform CRUD operations . the 'test' is the name of the database created
-mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
+//Offline
+//mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
+//Online
+mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
