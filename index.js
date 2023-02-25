@@ -8,7 +8,6 @@ path = require('path');
 const app = express();
 const mongoose = require('mongoose');
 const Models = require('./models.js');
-const { check, validationResult } = require('express-validator');
 
 const Movies = Models.Movie;
 const Users = Models.User;
@@ -16,29 +15,9 @@ const Genres = Models.Genre;
 const Directors = Models.Director;
 
 // This allows mongoose connect to the database so it can perform CRUD operations . the 'test' is the name of the database created
-//Local
-//mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
-//Secure version but doesn't seem to work?
-mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-const cors = require('cors');
-// let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
-
-/* app.use(cors({
-  origin: (origin, callback) => {
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){ // If a specific origin isn’t found on the list of allowed origins
-      let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
-      return callback(new Error(message ), false);
-    }
-    return callback(null, true);
-  }
-})); */
-
-app.use(cors());
-
 let auth = require('./auth')(app);
 
 const passport = require('passport');
@@ -138,23 +117,7 @@ app.get('/users/:Username', passport.authenticate('jwt', { session: false }), (r
 })
 
 // Allow new users register (create)
-app.post('/users', 
-[ 
-  // minimum value of 5 characters
-  check ('Username', 'Username is required').isLength({min: 5}),
-  check ('Username', 'Username contains non alphanumeric character - not allowed.').isAlphanumeric(),
-  // is not empty
-  check('Password', 'Password is required').not().isEmpty(),
-  check ('Email', 'Email does not appear to be valid').isEmail()
-], (req, res) => {
-    // check the validation object for errors
-  let errors = validationResult(req);
-
-  if(!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array()});
-  } 
-
-  let hashedPassword = Users.hashPassword(req.body.Password); // this hash the password before storing it in the mongoDB database
+app.post('/users', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOne({ Username: req.body.Username })
   .then((user) => {
     if (user) {
@@ -163,7 +126,7 @@ app.post('/users',
       Users
       .create({
         Username: req.body.Username,
-        Password: hashedPassword,
+        Password: req.body.Password,
         Email: req.body.Email,
         Birthday: req.body.Birthday
       })
@@ -181,18 +144,12 @@ app.post('/users',
 });
 
 // Allow users update their user info (Update)
-app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
-[ 
-  check ('Username', 'Username is required').isLength({min: 5}),
-  check ('Username', 'Username contains non alphanumeric character - not allowed.').isAlphanumeric(),
-  check('Password', 'Password is required').not().isEmpty(),
-  check ('Email', 'Email does not appear to be valid').isEmail()
-], (req, res) => {
+app.put('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username},
     { $set:
       {
         Username: req.body.Username,
-        Password: req.body.Password,
+        Passworf: req.body.Password,
         Email: req.body.Email,
         Birthday: req.body.Birthday
       }
@@ -266,8 +223,6 @@ app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
     res.status(500).send('Something broke!')
   });
 
-  const port = process.env.PORT || 8080;
-app.listen(port, '0.0.0.0',() => {
- console.log('Listening on Port ' + port);
-});
-
+  app.listen(8080, () => {
+    console.log('Your app is listening on port 8080');
+  });
